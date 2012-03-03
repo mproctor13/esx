@@ -258,6 +258,21 @@ module ESX
       puts
     end
     
+    def clone_disk(source, destination, print_progress = true)
+      Net::SSH.start(@address, @user, :password => @password) do |ssh|
+        if not (ssh.exec! "ls #{destination} 2>/dev/null").nil?
+          raise Exception.new("Destination file #{destination} already exists")
+        end
+        if print_progress
+          puts "\nConverting disk..."
+          ssh.exec "vmkfstools -i #{source} --diskformat thin #{destination}"
+        else
+          ssh.exec "vmkfstools -i #{source} --diskformat thin #{destination} >/dev/null 2>&1"
+        end
+      end
+      puts
+    end
+    
     private
     #
     # disk_file
